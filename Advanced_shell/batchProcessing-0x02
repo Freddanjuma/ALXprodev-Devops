@@ -1,24 +1,35 @@
 #!/bin/bash
 
-# Define the list of Pokemon in lowercase as required by the checker
+# Define the list of Pokemon
 pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 
-# Loop through each Pokemon in the list
 for pokename in "${pokemon_list[@]}"; do
     echo "Fetching data for $pokename..."
     
-    # Fetch data from the API
-    # -s: Silent mode
-    # -o: Output to file
-    curl -s "https://pokeapi.co/api/v2/pokemon/$pokename" -o "${pokename}.json"
-    
-    # Check if the file was created successfully
-    if [ -f "${pokename}.json" ]; then
-        echo "Successfully saved to ${pokename}.json"
-    else
-        echo "Failed to save ${pokename}.json"
+    # Retry mechanism variables
+    attempt=0
+    max_retries=3
+    success=false
+
+    # Retry loop: Run up to 3 times
+    while [ $attempt -lt $max_retries ]; do
+        # Try to fetch the data
+        if curl -s -f "https://pokeapi.co/api/v2/pokemon/$pokename" -o "${pokename}.json"; then
+            echo "Successfully saved to ${pokename}.json"
+            success=true
+            break  # Exit the retry loop on success
+        else
+            attempt=$((attempt + 1))
+            echo "Attempt $attempt failed. Retrying..."
+            sleep 1
+        fi
+    done
+
+    # If all 3 attempts failed, log the error
+    if [ "$success" = false ]; then
+        echo "Failed to fetch data for $pokename after $max_retries attempts." >> errors.txt
     fi
     
-    # Add a 2-second delay to handle rate limiting
+    # Delay between pokemon to handle rate limiting
     sleep 2
 done
