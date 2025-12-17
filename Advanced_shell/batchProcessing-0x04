@@ -38,6 +38,10 @@ for pokename in "${pokemon_list[@]}"; do
     fetch_pokemon_data "$pokename" &
 done
 
+# Check currently running background jobs
+echo "Active background processes:"
+jobs
+
 # Wait for all background processes to complete before exiting
 wait
 
