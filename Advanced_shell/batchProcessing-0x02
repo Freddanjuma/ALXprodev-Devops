@@ -1,15 +1,11 @@
 #!/bin/bash
 
-# Define the list of Pokemon
-pokemon_list=("Bulbasaur" "Ivysaur" "Venusaur" "Charmander" "Charmeleon")
+# Define the list of Pokemon in lowercase as required by the checker
+pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 
 # Loop through each Pokemon in the list
-for name in "${pokemon_list[@]}"; do
-    # Convert name to lowercase for the API URL and filename
-    # (APIs generally prefer lowercase, and it matches the filename example)
-    pokename=$(echo "$name" | tr '[:upper:]' '[:lower:]')
-    
-    echo "Fetching data for $name..."
+for pokename in "${pokemon_list[@]}"; do
+    echo "Fetching data for $pokename..."
     
     # Fetch data from the API
     # -s: Silent mode
