@@ -1,28 +1,36 @@
 #!/bin/bash
 
 # Define the output CSV file
-csv_file="pokemon_data.csv"
+csv_file="pokemon_report.csv"
 
 # Add a header to the CSV file
-echo "Name,Height,Weight" > "$csv_file"
+echo "Name,Height (m),Weight (kg)" > "$csv_file"
 
 # Loop through all JSON files in the current directory
 for file in *.json; do
     # Skip if no JSON files found
     [ -e "$file" ] || continue
     
-    # Extract name, height, and weight using jq
-    name=$(jq -r '.name' "$file")
-    height=$(jq -r '.height' "$file")
-    weight=$(jq -r '.weight' "$file")
+    # Extract name and capitalize the first letter
+    name=$(jq -r '.name' "$file" | sed 's/./\u&/')
+    
+    # Extract height and weight, dividing by 10 to convert to m and kg
+    height=$(jq -r '.height / 10' "$file")
+    weight=$(jq -r '.weight / 10' "$file")
     
     # Append the data to the CSV file
     echo "$name,$height,$weight" >> "$csv_file"
 done
 
+# Print the generation message
+echo "CSV Report generated at: $csv_file"
+echo ""
+
+# Display the content of the CSV file
+cat "$csv_file"
+echo ""
+
 # Use awk to calculate the average height and weight from the CSV file
-# -F, tells awk to use comma as the separator
-# NR > 1 skips the header row
 awk -F, '
     NR > 1 {
         total_height += $2
@@ -33,8 +41,9 @@ awk -F, '
         if (count > 0) {
             avg_height = total_height / count
             avg_weight = total_weight / count
-            print "Average Height: " avg_height
-            print "Average Weight: " avg_weight
+            # Format output to 2 decimal places (implied by example)
+            printf "Average Height: %.2f m\n", avg_height
+            printf "Average Weight: %.2f kg\n", avg_weight
         } else {
             print "No data found."
         }
