@@ -4,11 +4,12 @@ jq -r '.name,
        .height,
        .weight,
        .types[0].type.name' data.json |
+sed '1s/.*/\u&/;4s/.*/\u&/' |
 awk 'NR==1{name=$0}
      NR==2{height=$0/10}
      NR==3{weight=$0/10}
      NR==4{type=$0}
      END{
        printf "%s is of type %s, weighs %skg, and is %sm tall.\n",
-       toupper(substr(name,1,1)) substr(name,2), type, weight, height
+       name, type, weight, height
      }'
